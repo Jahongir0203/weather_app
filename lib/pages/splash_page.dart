@@ -1,10 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:weather_app/pages/home_page.dart';
-import 'package:weather_app/pages/home_page1.dart';
 import 'package:weather_app/pages/main_page.dart';
 import 'package:weather_app/utils/app_colors.dart';
 import 'package:weather_app/utils/utils.dart';

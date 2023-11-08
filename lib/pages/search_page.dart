@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:weather_app/model/city_weather_model.dart';
 import 'package:weather_app/services/city_weather_service.dart';
 import 'package:weather_app/utils/utils.dart';
 
 import '../utils/app_colors.dart';
-import 'home_page.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({Key? key}) : super(key: key);

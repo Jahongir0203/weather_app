@@ -53,33 +53,29 @@ class _HomePage1State extends State<HomePage1> {
   late CityWeatherModel cityWeatherModel;
 
   @override
-  void initState() {
-    locationService.determinePosition().then((value) => {
-          if (value != null)
-            {
-              currentWeatherService
-                  .getWeather(value.latitude, value.longitude)
-                  .then((value) => {
-                        weatherModel = value,
-                      })
-                  .onError((error, stackTrace) => {}),
-              hourlyWeatherService
-                  .getHourlyWeather(value.latitude, value.longitude)
-                  .then((value) => {
-                        setState(() {
-                          status = Status.loaded;
-                        }),
-                        hourlyWeatherModel = value,
-                      })
-                  .onError((error, stackTrace) => {
-                        print(error),
-                        setState(() {
-                          status = Status.error;
-                        }),
-                      }),
-            }
-        });
-    super.initState();
+  void initState() async {
+    locationService.determinePosition().then((value) =>
+    {
+      if (value != null)  {
+         currentWeatherService
+            .getWeather(value.latitude, value.longitude)
+            .then((value) =>
+        {
+          weatherModel = value,
+        }),
+
+          hourlyWeatherService
+              .getHourlyWeather(value.latitude, value.longitude)
+              .then((value) =>
+          {
+            setState(() {
+              status = Status.loaded;
+            }),
+            hourlyWeatherModel = value,
+          }),
+
+        }});
+        super.initState();
   }
 
   @override
@@ -89,12 +85,24 @@ class _HomePage1State extends State<HomePage1> {
         children: [
           Image.asset(
             AppPng.bgSplash,
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
           ),
           Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -165,23 +173,23 @@ class _HomePage1State extends State<HomePage1> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 30,right: 120,left: 120),
+                padding: const EdgeInsets.only(top: 30, right: 120, left: 120),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                Container(
-                  height:305,
-                  decoration: BoxDecoration(
-                      borderRadius:
-                      BorderRadius.circular(10),
-                      gradient: const LinearGradient(
-                          begin: Alignment.center,
-                          end: Alignment.center,
-                          colors: [
-                            AppColors.containerColor1,
-                            AppColors.containerColor2,
-                          ])),
-                ),
+                    Container(
+                      height: 305,
+                      decoration: BoxDecoration(
+                          borderRadius:
+                          BorderRadius.circular(10),
+                          gradient: const LinearGradient(
+                              begin: Alignment.center,
+                              end: Alignment.center,
+                              colors: [
+                                AppColors.containerColor1,
+                                AppColors.containerColor2,
+                              ])),
+                    ),
                   ],
                 ),
               ),
@@ -202,7 +210,7 @@ class _HomePage1State extends State<HomePage1> {
                 ),
               ),
               SizedBox(
-                height:230,
+                height: 230,
                 child: Padding(
                   padding: const EdgeInsets.only(
                     left: 15,
@@ -221,7 +229,7 @@ class _HomePage1State extends State<HomePage1> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 5),
                                   child: Container(
-                                    height:160,
+                                    height: 160,
                                     width: 100,
                                     decoration: BoxDecoration(
                                         borderRadius:
@@ -369,7 +377,8 @@ class _HomePage1State extends State<HomePage1> {
                       ),
                     ),
                     Image.network(
-                      'https://openweathermap.org/img/wn/${weatherModel.weather![0].icon}@2x.png',
+                      'https://openweathermap.org/img/wn/${weatherModel
+                          .weather![0].icon}@2x.png',
                       fit: BoxFit.fill,
                       height: 130,
                       width: 130,
@@ -390,8 +399,11 @@ class _HomePage1State extends State<HomePage1> {
                       child: Text(
                         DateTime.now()
                             .add(Duration(
-                                seconds: weatherModel.timezone! -
-                                    DateTime.now().timeZoneOffset.inMinutes))
+                            seconds: weatherModel.timezone! -
+                                DateTime
+                                    .now()
+                                    .timeZoneOffset
+                                    .inMinutes))
                             .toString(),
                         style: const TextStyle(
                           fontSize: 12,
@@ -499,7 +511,7 @@ class _HomePage1State extends State<HomePage1> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text(
                                         hourlyWeatherModel.list![index].dtTxt
@@ -512,10 +524,13 @@ class _HomePage1State extends State<HomePage1> {
                                         ),
                                       ),
                                       Image.network(
-                                        'https://openweathermap.org/img/wn/${hourlyWeatherModel.list![index].weather![0].icon}@2x.png',
+                                        'https://openweathermap.org/img/wn/${hourlyWeatherModel
+                                            .list![index].weather![0]
+                                            .icon}@2x.png',
                                       ),
                                       Text(
-                                        '${hourlyWeatherModel.list![index].main!.temp.toInt()}°',
+                                        '${hourlyWeatherModel.list![index].main!
+                                            .temp.toInt()}°',
                                         style: const TextStyle(
                                           color: AppColors.wordsColor,
                                           fontSize: 12,
@@ -593,16 +608,19 @@ class _HomePage1State extends State<HomePage1> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 5),
                                         child: InkWell(
-                                          onLongPress: (){
-                                             Navigator.push(context,MaterialPageRoute(builder: (context)=>CitiesDataPage(cityname: cities[index])));
-
+                                          onLongPress: () {
+                                            Navigator.push(context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        CitiesDataPage(
+                                                            cityname: cities[index])));
                                           },
                                           child: Container(
                                             height: 50,
                                             width: 160,
                                             decoration: BoxDecoration(
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                BorderRadius.circular(10),
                                                 gradient: const LinearGradient(
                                                     begin: Alignment.center,
                                                     end: Alignment.center,
@@ -612,41 +630,45 @@ class _HomePage1State extends State<HomePage1> {
                                                     ])),
                                             child: Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
+                                              MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 Image.network(
-                                                    'https://openweathermap.org/img/wn/${snapshot.data!.weather![0].icon}@2x.png'),
+                                                    'https://openweathermap.org/img/wn/${snapshot
+                                                        .data!.weather![0]
+                                                        .icon}@2x.png'),
                                                 Column(
                                                   crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                  MainAxisAlignment.center,
                                                   children: [
                                                     Text(
                                                       cities[index],
                                                       style: const TextStyle(
                                                         color:
-                                                            AppColors.wordsColor,
+                                                        AppColors.wordsColor,
                                                         fontSize: 14,
                                                         fontWeight:
-                                                            FontWeight.w600,
+                                                        FontWeight.w600,
                                                       ),
                                                     ),
                                                     Text(
                                                       snapshot
-                                                          .data!.weather![0].main
+                                                          .data!.weather![0]
+                                                          .main
                                                           .toString(),
                                                       style: const TextStyle(
                                                           color: AppColors
                                                               .wordsColor,
                                                           fontSize: 10,
                                                           fontWeight:
-                                                              FontWeight.w600),
+                                                          FontWeight.w600),
                                                     ),
                                                   ],
                                                 ),
                                                 Text(
-                                                  '${snapshot.data!.main!.temp.toInt()}°',
+                                                  '${snapshot.data!.main!.temp
+                                                      .toInt()}°',
                                                   style: const TextStyle(
                                                     color: AppColors.wordsColor,
                                                     fontWeight: FontWeight.w600,
@@ -678,7 +700,8 @@ class _HomePage1State extends State<HomePage1> {
         );
 
       case Status.error:
-        return const Center(child: Text('Error',style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),));
+        return const Center(child: Text('Error', style: TextStyle(
+            color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),));
     }
   }
 }

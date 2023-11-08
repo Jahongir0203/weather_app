@@ -1,6 +1,5 @@
 import 'package:crystal_navigation_bar/crystal_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:weather_app/pages/home_page.dart';
 import 'package:weather_app/pages/home_page1.dart';
 import 'package:weather_app/pages/notification_page.dart';
 import 'package:weather_app/pages/person_page.dart';
