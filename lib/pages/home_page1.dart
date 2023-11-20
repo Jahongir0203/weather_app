@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:weather_app/model/city_weather_model.dart';
 import 'package:weather_app/model/weather_model.dart';
@@ -47,35 +48,36 @@ class _HomePage1State extends State<HomePage1> {
   CurrentWeatherService currentWeatherService = CurrentWeatherService();
   HourlyWeatherService hourlyWeatherService = HourlyWeatherService();
   CityWeatherService cityWeatherService = CityWeatherService();
-
+  late bool isLoading;
   late HourlyWeatherModel hourlyWeatherModel;
   late WeatherModel weatherModel;
   late CityWeatherModel cityWeatherModel;
 
+  Future initData(Position value) async {
+    weatherModel =
+        await currentWeatherService.getWeather(value.latitude, value.longitude);
+    hourlyWeatherModel = await hourlyWeatherService.getHourlyWeather(
+        value.latitude, value.longitude);
+  }
+  void getWeather(){
+    status=Status.loading;
+    isLoading=false;
+    locationService.determinePosition().then((value) => {
+      {
+        initData(value).then((value) {
+          setState(() {
+            isLoading=true;
+            status=Status.loaded;
+          });
+        })
+      }
+    });
+  }
+
   @override
-  void initState() async {
-    locationService.determinePosition().then((value) =>
-    {
-      if (value != null)  {
-         currentWeatherService
-            .getWeather(value.latitude, value.longitude)
-            .then((value) =>
-        {
-          weatherModel = value,
-        }),
-
-          hourlyWeatherService
-              .getHourlyWeather(value.latitude, value.longitude)
-              .then((value) =>
-          {
-            setState(() {
-              status = Status.loaded;
-            }),
-            hourlyWeatherModel = value,
-          }),
-
-        }});
-        super.initState();
+  void initState() {
+   getWeather();
+    super.initState();
   }
 
   @override
@@ -85,24 +87,12 @@ class _HomePage1State extends State<HomePage1> {
         children: [
           Image.asset(
             AppPng.bgSplash,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height,
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
           ),
           Container(
-            height: MediaQuery
-                .of(context)
-                .size
-                .height,
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -122,66 +112,87 @@ class _HomePage1State extends State<HomePage1> {
   }
 
   buildBody() {
+
+
     switch (status) {
       case Status.loading:
-        return Shimmer(gradient: LinearGradient(colors: [
-          AppColors.containerColor1,
-          AppColors.containerColor2,
-
-        ]), child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 40,
-                  right: 15,
-                  left: 15,
-                  bottom: 30,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      height: 35,
-                      width: 35,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          gradient: const LinearGradient(
-                            begin: Alignment.center,
-                            end: Alignment.center,
-                            colors: [
-                              AppColors.containerColor1,
-                              AppColors.containerColor2,
-                            ],
-                          )),
+        return Shimmer(
+            gradient: const LinearGradient(colors: [
+              AppColors.containerColor1,
+              AppColors.containerColor2,
+            ]),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 40,
+                      right: 15,
+                      left: 15,
+                      bottom: 30,
                     ),
-
-                    Container(
-                      height: 35,
-                      width: 35,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          height: 35,
+                          width: 35,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              gradient: const LinearGradient(
+                                begin: Alignment.center,
+                                end: Alignment.center,
+                                colors: [
+                                  AppColors.containerColor1,
+                                  AppColors.containerColor2,
+                                ],
+                              )),
+                        ),
+                        Container(
+                          height: 35,
+                          width: 35,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              gradient: const LinearGradient(
+                                begin: Alignment.center,
+                                end: Alignment.center,
+                                colors: [
+                                  AppColors.containerColor1,
+                                  AppColors.containerColor2,
+                                ],
+                              )),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                    const EdgeInsets.only(top: 30, right: 120, left: 120),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          height: 305,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              gradient: const LinearGradient(
+                                  begin: Alignment.center,
+                                  end: Alignment.center,
+                                  colors: [
+                                    AppColors.containerColor1,
+                                    AppColors.containerColor2,
+                                  ])),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 70, right: 54, top: 19, bottom: 30),
+                    child: Container(
+                      height: 95,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          gradient: const LinearGradient(
-                            begin: Alignment.center,
-                            end: Alignment.center,
-                            colors: [
-                              AppColors.containerColor1,
-                              AppColors.containerColor2,
-                            ],
-                          )),),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 30, right: 120, left: 120),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      height: 305,
-                      decoration: BoxDecoration(
-                          borderRadius:
-                          BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           gradient: const LinearGradient(
                               begin: Alignment.center,
                               end: Alignment.center,
@@ -190,113 +201,92 @@ class _HomePage1State extends State<HomePage1> {
                                 AppColors.containerColor2,
                               ])),
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 70, right: 54, top: 19, bottom: 30),
-                child: Container(
-                  height: 95,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      gradient: const LinearGradient(
-                          begin: Alignment.center,
-                          end: Alignment.center,
-                          colors: [
-                            AppColors.containerColor1,
-                            AppColors.containerColor2,
-                          ])),
-                ),
-              ),
-              SizedBox(
-                height: 230,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 15,
                   ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 180,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: 3,
-                            itemBuilder: (context, index) {
-                              return
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 5),
-                                  child: Container(
-                                    height: 160,
-                                    width: 100,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                        gradient: const LinearGradient(
-                                            begin: Alignment.center,
-                                            end: Alignment.center,
-                                            colors: [
-                                              AppColors.containerColor1,
-                                              AppColors.containerColor2,
-                                            ])),
-                                  ),
-                                );
-                            }
-                        ),
+                  SizedBox(
+                    height: 230,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 15,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 100,
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 15,
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: 3,
-                            itemBuilder: (context, index) {
-                              return
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 5),
-                                  child: Container(
-                                    height: 50,
-                                    width: 160,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                        gradient: const LinearGradient(
-                                            begin: Alignment.center,
-                                            end: Alignment.center,
-                                            colors: [
-                                              AppColors.containerColor1,
-                                              AppColors.containerColor2,
-                                            ])),
-                                  ),
-                                );
-                            }
-                        ),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 180,
+                            child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: 3,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: Container(
+                                      height: 160,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(10),
+                                          gradient: const LinearGradient(
+                                              begin: Alignment.center,
+                                              end: Alignment.center,
+                                              colors: [
+                                                AppColors.containerColor1,
+                                                AppColors.containerColor2,
+                                              ])),
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  SizedBox(
+                    height: 100,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 15,
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 50,
+                            child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: 3,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: Container(
+                                      height: 50,
+                                      width: 160,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(10),
+                                          gradient: const LinearGradient(
+                                              begin: Alignment.center,
+                                              end: Alignment.center,
+                                              colors: [
+                                                AppColors.containerColor1,
+                                                AppColors.containerColor2,
+                                              ])),
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 100,
+                  ),
+                ],
               ),
-              const SizedBox(
-                height: 100,
-              ),
-            ],
-          ),
-        ));
+            ));
+
       case Status.loaded:
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -352,7 +342,7 @@ class _HomePage1State extends State<HomePage1> {
                         child: Center(
                           child: IconButton(
                             onPressed: () {
-                              setState(() {});
+                             getWeather();
                             },
                             icon: const Icon(
                               Icons.replay,
@@ -377,8 +367,7 @@ class _HomePage1State extends State<HomePage1> {
                       ),
                     ),
                     Image.network(
-                      'https://openweathermap.org/img/wn/${weatherModel
-                          .weather![0].icon}@2x.png',
+                      'https://openweathermap.org/img/wn/${weatherModel.weather![0].icon}@2x.png',
                       fit: BoxFit.fill,
                       height: 130,
                       width: 130,
@@ -399,11 +388,8 @@ class _HomePage1State extends State<HomePage1> {
                       child: Text(
                         DateTime.now()
                             .add(Duration(
-                            seconds: weatherModel.timezone! -
-                                DateTime
-                                    .now()
-                                    .timeZoneOffset
-                                    .inMinutes))
+                                seconds: weatherModel.timezone! -
+                                    DateTime.now().timeZoneOffset.inMinutes))
                             .toString(),
                         style: const TextStyle(
                           fontSize: 12,
@@ -511,7 +497,7 @@ class _HomePage1State extends State<HomePage1> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                        MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Text(
                                         hourlyWeatherModel.list![index].dtTxt
@@ -524,13 +510,10 @@ class _HomePage1State extends State<HomePage1> {
                                         ),
                                       ),
                                       Image.network(
-                                        'https://openweathermap.org/img/wn/${hourlyWeatherModel
-                                            .list![index].weather![0]
-                                            .icon}@2x.png',
+                                        'https://openweathermap.org/img/wn/${hourlyWeatherModel.list![index].weather![0].icon}@2x.png',
                                       ),
                                       Text(
-                                        '${hourlyWeatherModel.list![index].main!
-                                            .temp.toInt()}°',
+                                        '${hourlyWeatherModel.list![index].main!.temp.toInt()}°',
                                         style: const TextStyle(
                                           color: AppColors.wordsColor,
                                           fontSize: 12,
@@ -608,19 +591,21 @@ class _HomePage1State extends State<HomePage1> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 5),
                                         child: InkWell(
-                                          onLongPress: () {
-                                            Navigator.push(context,
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
                                                 MaterialPageRoute(
                                                     builder: (context) =>
                                                         CitiesDataPage(
-                                                            cityname: cities[index])));
+                                                            cityname: cities[
+                                                                index])));
                                           },
                                           child: Container(
                                             height: 50,
                                             width: 160,
                                             decoration: BoxDecoration(
                                                 borderRadius:
-                                                BorderRadius.circular(10),
+                                                    BorderRadius.circular(10),
                                                 gradient: const LinearGradient(
                                                     begin: Alignment.center,
                                                     end: Alignment.center,
@@ -630,31 +615,28 @@ class _HomePage1State extends State<HomePage1> {
                                                     ])),
                                             child: Row(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
+                                                  MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 Image.network(
-                                                    'https://openweathermap.org/img/wn/${snapshot
-                                                        .data!.weather![0]
-                                                        .icon}@2x.png'),
+                                                    'https://openweathermap.org/img/wn/${snapshot.data!.weather![0].icon}@2x.png'),
                                                 Column(
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                      CrossAxisAlignment.start,
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                                      MainAxisAlignment.center,
                                                   children: [
                                                     Text(
                                                       cities[index],
                                                       style: const TextStyle(
-                                                        color:
-                                                        AppColors.wordsColor,
+                                                        color: AppColors
+                                                            .wordsColor,
                                                         fontSize: 14,
                                                         fontWeight:
-                                                        FontWeight.w600,
+                                                            FontWeight.w600,
                                                       ),
                                                     ),
                                                     Text(
-                                                      snapshot
-                                                          .data!.weather![0]
+                                                      snapshot.data!.weather![0]
                                                           .main
                                                           .toString(),
                                                       style: const TextStyle(
@@ -662,13 +644,12 @@ class _HomePage1State extends State<HomePage1> {
                                                               .wordsColor,
                                                           fontSize: 10,
                                                           fontWeight:
-                                                          FontWeight.w600),
+                                                              FontWeight.w600),
                                                     ),
                                                   ],
                                                 ),
                                                 Text(
-                                                  '${snapshot.data!.main!.temp
-                                                      .toInt()}°',
+                                                  '${snapshot.data!.main!.temp.toInt()}°',
                                                   style: const TextStyle(
                                                     color: AppColors.wordsColor,
                                                     fontWeight: FontWeight.w600,
@@ -700,8 +681,12 @@ class _HomePage1State extends State<HomePage1> {
         );
 
       case Status.error:
-        return const Center(child: Text('Error', style: TextStyle(
-            color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),));
+        return const Center(
+            child: Text(
+          'Error',
+          style: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),
+        ));
     }
   }
 }
@@ -743,4 +728,5 @@ class buildWeatherContainer extends StatelessWidget {
       ],
     );
   }
+
 }
