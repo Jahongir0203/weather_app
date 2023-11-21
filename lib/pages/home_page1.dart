@@ -60,8 +60,10 @@ class _HomePage1State extends State<HomePage1> {
         value.latitude, value.longitude);
   }
   void getWeather(){
-    status=Status.loading;
-    isLoading=false;
+   setState(() {
+     status=Status.loading;
+     isLoading=false;
+   });
     locationService.determinePosition().then((value) => {
       {
         initData(value).then((value) {
