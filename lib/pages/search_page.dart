@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather_app/model/city_weather_model.dart';
 import 'package:weather_app/services/city_weather_service.dart';
 import 'package:weather_app/utils/utils.dart';
 
+import '../cubit/weather_cubit.dart';
+import '../cubit/weather_state.dart';
 import '../utils/app_colors.dart';
 
 class SearchPage extends StatefulWidget {
@@ -19,30 +21,57 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Image.asset(
-            AppPng.bgSplash,
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.gradientColor1,
-                  AppColors.gradientColor2,
-                  AppColors.gradientColor3,
-                ],
+    return BlocBuilder<WeatherCubit, WeatherState>(
+      bloc: context.read<WeatherCubit>()..getWeather(cityName ?? 'Tashkent'),
+      builder: (context, state) {
+        return Scaffold(
+          body: Stack(
+            children: [
+              Image.asset(
+                AppPng.bgSplash,
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
               ),
-            ),
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.gradientColor1,
+                      AppColors.gradientColor2,
+                      AppColors.gradientColor3,
+                    ],
+                  ),
+                ),
+              ),
+              buildSingleChildScrollView(context, state)
+            ],
           ),
-          SingleChildScrollView(
+        );
+      },
+    );
+  }
+
+  buildSingleChildScrollView(
+    BuildContext context,
+    WeatherState state,
+  ) {
+    switch (state) {
+      case WeatherInitial():
+        return Text('Initial');
+
+      case WeatherLoadInProgress():
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      case WeatherLoadSuccess():
+        {
+          var data = (state as WeatherLoadSuccess).cityWeatherModel;
+
+          return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -86,7 +115,9 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                               ),
                               hintText: 'Search City',
                               prefixIcon: IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  context.read<WeatherCubit>().getWeather(cityName?? 'Tashkent');
+                                },
                                 icon: const Icon(
                                   Icons.search,
                                   color: Colors.white,
@@ -130,7 +161,8 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                             ),
                             child: IconButton(
                               onPressed: () {
-                                setState(() {});
+
+                                context.read<WeatherCubit>().getWeather(cityName?? 'Tashkent');
                               },
                               icon: const Icon(
                                 Icons.location_on_outlined,
@@ -143,8 +175,7 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                   ),
                 ),
                 cityName == null
-                    ? SizedBox(
-                      )
+                    ? SizedBox()
                     : Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 15),
@@ -161,202 +192,171 @@ class _SearchPageState extends State<SearchPage> with TickerProviderStateMixin {
                                   AppColors.containerColor2,
                                 ]),
                           ),
-                          child: FutureBuilder(
-                            future: cityWeatherService.getCityWeather(cityName!),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<CityWeatherModel> snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const SpinKitDoubleBounce(
-                                  color: Colors.white,
-                                );
-                              }
-
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (snapshot.hasError) {
-                                  return Text('Error');
-                                }
-                                if (snapshot.hasData) {
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Column(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Text(
-                                                cityName.toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              Text(
-                                                snapshot
-                                                    .data!.weather![0].description
-                                                    .toString(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Image.network(
-                                            'https://openweathermap.org/img/wn/${snapshot.data!.weather![0].icon}@2x.png',
-                                            height: 180,
-                                            width: 180,
-                                            fit: BoxFit.fill,
-                                          ),
-                                        ],
+                                      Text(
+                                        cityName.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          buildWeatherContainer(
-                                            text: '30%',
-                                            text1: 'Precipitation',
-                                            image: AppPng.umbrellaPng,
-                                          ),
-                                          buildWeatherContainer(
-                                            text: snapshot.data!.main!.humidity
-                                                .toString(),
-                                            text1: 'Humidity',
-                                            image: AppPng.waterPng,
-                                          ),
-                                          buildWeatherContainer(
-                                            text:
-                                                '${snapshot.data!.wind!.speed.toInt()}km/h',
-                                            text1: 'Wind Speed',
-                                            image: AppPng.windPng,
-                                          ),
-                                        ],
+                                      Text(
+                                        '${data?.weather![0].description}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text(
-                                            'Temp',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${snapshot.data!.main!.temp.toInt()}°',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text(
-                                            'Temp feels like',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${snapshot.data!.main!.feelsLike.toInt()}°',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text(
-                                            'Temp max',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${snapshot.data!.main!.tempMax.toInt()}°',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          const Text(
-                                            'Temp min',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          Text(
-                                            '${snapshot.data!.main!.tempMin.toInt()}°',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      )
                                     ],
-                                  );
-                                }
-                              }
-
-                              return SpinKitSquareCircle(
-                                color: Colors.white,
-                                size: 50.0,
-                                controller: AnimationController(
-                                    vsync: this,
-                                    duration: const Duration(milliseconds: 1200)),
-                              );
-                            },
+                                  ),
+                                  Image.network(
+                                    'https://openweathermap.org/img/wn/${data!.weather![0].icon}@2x.png',
+                                    height: 180,
+                                    width: 180,
+                                    fit: BoxFit.fill,
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  buildWeatherContainer(
+                                    text: '30%',
+                                    text1: 'Precipitation',
+                                    image: AppPng.umbrellaPng,
+                                  ),
+                                  buildWeatherContainer(
+                                    text: data.main!.humidity.toString(),
+                                    text1: 'Humidity',
+                                    image: AppPng.waterPng,
+                                  ),
+                                  buildWeatherContainer(
+                                    text: '${data.wind!.speed.toInt()}km/h',
+                                    text1: 'Wind Speed',
+                                    image: AppPng.windPng,
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text(
+                                    'Temp',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${data.main!.temp.toInt()}°',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text(
+                                    'Temp feels like',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${data.main!.feelsLike.toInt()}°',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text(
+                                    'Temp max',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${data.main!.tempMax.toInt()}°',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const Text(
+                                    'Temp min',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${data.main!.tempMin.toInt()}°',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
                       )
               ],
             ),
-          )
-        ],
-      ),
-    );
+          );
+        }
+      case WeatherFailure():
+        return Center(
+          child: Text('Error'),
+        );
+    }
   }
 }
+
 class buildWeatherContainer extends StatelessWidget {
   buildWeatherContainer({
     super.key,

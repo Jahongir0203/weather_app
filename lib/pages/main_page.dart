@@ -6,6 +6,7 @@ import 'package:weather_app/pages/person_page.dart';
 import 'package:weather_app/pages/search_page.dart';
 
 import '../utils/app_colors.dart';
+import 'home_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -17,7 +18,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
   List pages = [
-    HomePage1(),
+    HomePage(),
     SearchPage(),
     PersonPage(),
     NotificationPage(),
